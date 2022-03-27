@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pi
+spec:
+  template:
+    spec:
+      containers:
+      - name: pi
+        # image: perl
+        image: ubuntu
+        # command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"]
+        command: ["/bin/sh", "-c"]
+        args:
+        - echo "error test";
+          exit 0;
+      restartPolicy: Never
+  backoffLimit: 4
+
