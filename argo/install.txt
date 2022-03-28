@@ -2,10 +2,10 @@ source : [https://tarun-gulati1988.medium.com/running-argo-workflows-in-minikube
 
 kubectl create ns argo
 
-kubectl apply -n argo -f [https://raw.githubusercontent.com/argoproj/argo-workflows/master/manifests/quick-start-postgres.yaml](https://raw.githubusercontent.com/argoproj/argo-workflows/master/manifests/quick-start-postgres.yaml)
+kubectl apply -n argo -f https://raw.githubusercontent.com/argoproj/argo-workflows/master/manifests/quick-start-postgres.yaml
 
-kubectl create clusterrolebinding automl-cluster-admin-binding --clusterrole=cluster-admin [--user=automl@gmail.com](mailto:--user=automl@gmail.com)
+kubectl create clusterrolebinding automl-cluster-admin-binding --clusterrole=cluster-admin --user=automl@gmail.com
 
 kubectl -n argo port-forward deployment/argo-server 2746:2746
 
-[https://localhost:2746/workflows?limit=500](https://localhost:2746/workflows?limit=500)
+https://localhost:2746/workflows?limit=500
