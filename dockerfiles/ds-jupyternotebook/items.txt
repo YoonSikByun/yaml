@@ -1,0 +1,10 @@
+1. Jupyter Notebook + nbextensions
+    (nbextensions 예시 : Freeze, Execute Time, Table of Contents(2) 등등...)
+2. 10.167.122.241 파이썬 패키지 Repository 연결
+3. 파이썬 패키지 : interpret, fbprophet, SALib, exact
+4. Python >= 3.8 : SAMPL 호환 문제가 있다면, 호환 가능한 최신버전
+5. yum install: htop, tmux, vim
+6. 폰트 : 나눔고딕, 나눔고득 D2coding
+    (https://hangeul.naver.com/2021/fonts/nanum)
+7. TFDV 및 TFDV를 사용하기 위한 환경(node 등)
+8. Tensorboard + What If Tool
