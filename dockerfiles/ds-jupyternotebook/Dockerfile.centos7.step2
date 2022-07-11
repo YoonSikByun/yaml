@@ -1,0 +1,6 @@
+FROM centos7-base:220711
+
+COPY ./requirements.txt /root
+RUN set -eux; \
+    pip install -r /root/requirements.txt && \
+    rm -rf /root/requirements.txt
