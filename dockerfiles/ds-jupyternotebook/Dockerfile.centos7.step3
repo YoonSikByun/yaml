@@ -1,0 +1,10 @@
+FROM centos7-mid:220711
+
+RUN set -eux; \
+pip install --upgrade Flask Flask-Compress Flask-Cors Flask-JWT-Extended Flask-RESTful \
+    Flask-SQLAlchemy mysql-connector; \
+    pip install --upgrade pystan==2.18.0.0 \
+    pytz tqdm convertdate lunarcalendar holidays convertdate fbprophet
+
+RUN yum-config-manager --add-repo https://copr.fedorainfracloud.org/coprs/vbatts/bazel/repo/epel-7/vbatts-bazel-epel-7.repo; \
+    yum -y install bazel

@@ -1,0 +1,14 @@
+FROM centos7-base:220503
+
+ENV SLUGIFY_USES_TEXT_UNIDECODE=yes
+COPY ./requirements.txt /root
+RUN set -eux; \
+    pip install wheel && \
+    pip install setuptools --upgrade && \
+    pip install -r /root/requirements.txt
+RUN set -eux; \
+    pip install pystan==2.18.0.0 \
+    pytz tqdm convertdate lunarcalendar holidays convertdate && \
+    pip install fbprophet
+
+# RUN pip install tensorflow-data-validation

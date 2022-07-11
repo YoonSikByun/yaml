@@ -1,0 +1,103 @@
+FROM centos:7.6.1810
+
+# Default to UTF-8 file.encoding
+ENV SLUGIFY_USES_TEXT_UNIDECODE=yes
+ENV LANG en_US.UTF-8
+ENV TZ=Asiz/Seoul
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# 인코딩 환경변수 설정
+RUN echo 'export PYTHONIOENCODING=utf-8' >> /etc/skel/.bashrc && \
+echo 'set encoding=utf-8' >> /etc/vimrc && \
+echo 'set fileencoding=utf-8,cp949' >> /etc/vimrc
+
+# 기본 라이브러리 설치
+RUN set -eux; yum update -y; \
+	yum -y install https://packages.endpointdev.com/rhel/7/os/x86_64/endpoint-repo.x86_64.rpm && \
+    yum -y groupinstall "Development Tools" && \
+    yum -y install gcc openssl-devel bzip2-devel libffi-devel xz-devel sqlite-devel \
+	libssl-dev bzip2 zlib1g zlib1g zlib1g-dev libsqlite3-dev libcurl4-gnutls-dev libxml2-dev vim git git-svn \
+	gzip tar binutils freetype fontconfig net-tools telnet wget curl-devel \
+	cronie cyrus-sasl-devel cyrus-sasl-gssapi cyrus-sasl-md5 cyrus-sasl-plain && \
+	rm -rf /var/cache/yum
+
+# node.js 설치
+RUN set -eux;curl –sL https://rpm.nodesource.com/setup_14.x | bash -;yum install -y nodejs
+
+#java11 설치
+ENV JAVA_HOME /usr/java/openjdk-11
+ENV JAVA_VERSION 11.0.14.1
+
+RUN set -eux; \
+	\
+	arch="$(objdump="$(command -v objdump)" && objdump --file-headers "$objdump" | awk -F '[:,]+[[:space:]]+' '$1 == "architecture" { print $2 }')"; \
+	case "$arch" in \
+		'i386:x86-64') \
+			downloadUrl='https://github.com/AdoptOpenJDK/openjdk11-upstream-binaries/releases/download/jdk-11.0.14.1%2B1/OpenJDK11U-jdk_x64_linux_11.0.14.1_1.tar.gz'; \
+			;; \
+		'aarch64') \
+			downloadUrl='https://github.com/AdoptOpenJDK/openjdk11-upstream-binaries/releases/download/jdk-11.0.14.1%2B1/OpenJDK11U-jdk_aarch64_linux_11.0.14.1_1.tar.gz'; \
+			;; \
+		*) echo >&2 "error: unsupported architecture: '$arch'"; exit 1 ;; \
+	esac; \
+	\
+	curl -fL -o openjdk.tgz "$downloadUrl"; \
+	curl -fL -o openjdk.tgz.asc "$downloadUrl.sign"; \
+	\
+	export GNUPGHOME="$(mktemp -d)"; \
+	gpg --batch --keyserver keyserver.ubuntu.com --recv-keys EAC843EBD3EFDB98CC772FADA5CD6035332FA671; \
+	gpg --batch --keyserver keyserver.ubuntu.com --keyserver-options no-self-sigs-only --recv-keys CA5F11C6CE22644D42C6AC4492EF8D39DC13168F; \
+	gpg --batch --list-sigs --keyid-format 0xLONG CA5F11C6CE22644D42C6AC4492EF8D39DC13168F \
+		| tee /dev/stderr \
+		| grep '0xA5CD6035332FA671' \
+		| grep 'Andrew Haley'; \
+	gpg --batch --verify openjdk.tgz.asc openjdk.tgz; \
+	rm -rf "$GNUPGHOME"; \
+	\
+	mkdir -p "$JAVA_HOME"; \
+	tar --extract \
+		--file openjdk.tgz \
+		--directory "$JAVA_HOME" \
+		--strip-components 1 \
+		--no-same-owner \
+	; \
+	rm openjdk.tgz*; \
+	\
+	rm -rf "$JAVA_HOME/lib/security/cacerts"; \
+	ln -sT /etc/pki/ca-trust/extracted/java/cacerts "$JAVA_HOME/lib/security/cacerts"; \
+	\
+	ln -sfT "$JAVA_HOME" /usr/java/default; \
+	ln -sfT "$JAVA_HOME" /usr/java/latest; \
+	for bin in "$JAVA_HOME/bin/"*; do \
+		base="$(basename "$bin")"; \
+		[ ! -e "/usr/bin/$base" ]; \
+		alternatives --install "/usr/bin/$base" "$base" "$bin" 20000; \
+	done; \
+	\
+	java -Xshare:dump; \
+	\
+	fileEncoding="$(echo 'System.out.println(System.getProperty("file.encoding"))' | jshell -s -)"; [ "$fileEncoding" = 'UTF-8' ]; rm -rf ~/.java; \
+	javac --version; \
+	java --version
+
+ENV PATH $JAVA_HOME/bin:$PATH
+
+# Python3.8.13 설치
+RUN set -eux; \
+    cd /usr/local && \
+    wget https://www.python.org/ftp/python/3.8.13/Python-3.8.13.tgz && \
+    tar xvf Python-3.8.13.tgz && \
+    rm Python-3.8.13.tgz && \
+    cd Python-3.8*/ && \
+    ./configure --enable-optimizations && \
+    make altinstall
+
+WORKDIR /usr/local/bin
+RUN ln -s python3.8 python && ln -s python3.8 python3 && ln -s pip3.8 pip && ln -s pip3.8 pip3 && \
+python -m pip install --upgrade pip
+
+RUN set -eux; \
+	yum -y install epel-release; \
+	yum -y install htop tmux; \
+	pip install wheel && \
+    pip install setuptools --upgrade

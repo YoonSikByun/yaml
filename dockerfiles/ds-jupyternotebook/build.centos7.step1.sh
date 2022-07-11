@@ -1,0 +1,1 @@
+docker build --platform linux/amd64 -t centos7-base:220711 -f ./Dockerfile.centos7.step1 .

@@ -1,0 +1,1 @@
+docker build -t centos7-base:220622 -f .\Dockerfile.centos7.step1 .

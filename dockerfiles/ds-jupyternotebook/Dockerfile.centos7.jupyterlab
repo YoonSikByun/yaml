@@ -1,0 +1,14 @@
+FROM centos7-final:220704
+
+RUN set -eux; \
+    pip install --upgrade jupyterlab==3.1.1 traitlets jupyterlab-git==0.30.1 jupyter jupyterlab-system-monitor \
+                 lckr-jupyterlab-variableinspector jupyter-dash jupyterlab_execute_time nbdime==3.1.0 \
+                 plotly==5.1.0
+# RUN set -eux; \
+#     pip install --upgrade jupyterlab traitlets jupyterlab-git jupyter jupyterlab-system-monitor \
+#                  lckr-jupyterlab-variableinspector jupyter-dash jupyterlab_execute_time nbdime \
+#                  plotly
+
+#RUN set -eux;pip install --upgrade traitlets;jupyter labextension install @jupyterlab/toc;jupyter lab build
+RUN jupyter lab build
+RUN pip uninstall Jinja2 -y;pip install Jinja2==3.0.1

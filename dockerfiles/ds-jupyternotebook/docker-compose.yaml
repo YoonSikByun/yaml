@@ -1,0 +1,13 @@
+version: '3.3'
+services:
+  jupyter-lab:
+    image: 'centos7-jupyterlab:220704'
+    command: bash -c "jupyter-lab --allow-root"
+    # command: bash -c "init"
+    expose:
+      - '8888'
+    ports:
+      - '8888:8888'
+      # - target: 8888
+      #   published: 8888
+      #   protocol: tcp

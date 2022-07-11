@@ -1,0 +1,1 @@
+docker build --platform linux/amd64 --no-cache -t centos7:220424 -f ./Dockerfile.centos7.base .
